@@ -1,12 +1,13 @@
 <script>
     import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { writable } from 'svelte/store';
     let group = $state('Database')
 
     let firstName = $state('');
     let lastName = $state('');
     let id = $state('');
 
-    function checkCharIsAlphabet(event) {
+    function checkCharIsAlphabet(event, value) {
         value(event.target.value.replace(/[^a-zA-Z\s]/g, ''));
     }
 
@@ -14,11 +15,37 @@
         id = id.replace(/[^0-9]/g,'')
     }
 
-    const employeeDB = [
-        {id:'123456', firstName: "Mike", lastName: "Smith", clockInTime: "1997-07-16T19:20:30.45+01:00", clockOutTime:"1997-07-16T19:21:30.45+01:00"},
-        {id:'222222', firstName: "Chris", lastName: "John", clockInTime: "1997-08-16T19:20:30.45+01:00", clockOutTime:"1997-09-16T19:23:30.45+01:00"},
-        {id:'123456', firstName: "Mary", lastName: "Jean", clockInTime: "1997-07-16T19:22:30.45+01:00", clockOutTime:null}
-    ]
+    let handleClockIn = () => employeeDB.update( prev=>{
+        if(id === '' || firstName ==='' || lastName ===''){
+            alert("Please check that all input are not empty")
+            return prev
+        }
+        else if(id.length != 6){
+            alert("Please enter a 6 digit id number")
+            return prev
+        }
+        const date = new Date()
+
+        const year = date.getFullYear()
+        const month = date.getMonth()+1
+        const day = date.getDate()
+
+        const hour = date.getHours()
+        const minute = date.getMinutes()
+        const second = date.getSeconds()
+
+        let dateTime = year+'-'+month+'-'+day+'@'+hour+':'+minute+':'+second
+        console.log(dateTime)
+        let newClockIn = {id:id, firstName:firstName, lastName:lastName, clockInTimeStamp:dateTime, clockOutTime:null}
+        console.log(employeeDB, newClockIn)
+        return [...prev, newClockIn]
+    })
+
+    const employeeDB = writable([
+        {id:'123456', firstName: "Mike", lastName: "Smith", clockInTimeStamp: "2023-11-12@13:52:22", clockOutTime:"2023-11-12@20:22:22"},
+        {id:'222222', firstName: "Chris", lastName: "John", clockInTimeStamp: "2024-10-10@1:52:22", clockOutTime:"2024-10-10@11:52:22"},
+        {id:'123456', firstName: "Mary", lastName: "Jean", clockInTimeStamp: "2024-12-18@20:52:22", clockOutTime:null}
+    ])
     
 </script>
 
@@ -31,7 +58,7 @@
         {/snippet}
         {#snippet content()}
             <Tabs.Panel value="Input">
-                <div class="space-y-8 w-1/3 justify-self-center">
+                <div class="space-y-8 w-1/3 justify-self-center" >
                     <div class="gap-6">
                         <label class="EmployeeID">
                             <h6 class="h6 pb-2">Employee ID</h6>
@@ -41,7 +68,7 @@
                     <div class="gap-6">
                         <label class="FirstName">
                             <h6 class="h6 pb-2">First Name</h6>
-                            <input bind:value={firstName} oninput={(event) => checkCharIsAlphabet(event, (value) => firstName = value)} class="input" type="text" placeholder="First Name"/>
+                            <input bind:value={firstName} oninput={(event) => checkCharIsAlphabet(event, (value) => firstName = value)} class="input" type="text" placeholder="First Name">
                         </label> 
                     </div>
                     <div class="gap-6">
@@ -51,7 +78,7 @@
                         </label> 
                     </div>
                     <div class="gap-6 gap-x-8 flex justify-self-center">
-                        <button type="button" class="btn preset-filled-surface-500">Clock-In</button>
+                        <button type="submit" class="btn preset-filled-surface-500" onclick={handleClockIn}>Clock-In</button>
                         <button type="button" class="btn preset-filled-surface-500">Clock-Out</button>
                     </div>
                 </div>
@@ -72,12 +99,12 @@
                         </tr>
                     </thead>
                     <tbody class="hover:[&>tr]:preset-tonal-primary">
-                        {#each employeeDB as item}
+                        {#each $employeeDB as item}
                                 <tr>
                                     <td class="text-xs md:text-base text-wrap">{item.id}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.firstName}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.lastName}</td>
-                                    <td class="text-xs md:text-base text-wrap">{item.clockInTime}</td>
+                                    <td class="text-xs md:text-base text-wrap">{item.clockInTimeStamp}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.clockOutTime}</td>
                                 </tr>
                         {/each}      
