@@ -1,7 +1,10 @@
 <script>
+	import { goto } from '$app/navigation';
     import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
-    let group = $state('Database')
+
+    let group = $state('Input')
 
     let firstName = $state('');
     let lastName = $state('');
@@ -15,6 +18,24 @@
         id = id.replace(/[^0-9]/g,'')
     }
 
+    onMount(async function () {
+        const endpoint = 'http://127.0.0.1:8000/'
+        const response = await fetch(endpoint)
+        const data = await response.json()
+        // console.log(data)
+
+        data.map(obj => {
+            if (obj.hasOwnProperty('id')){
+                obj.id= obj.id.toString().padStart(6,'0')
+            }
+        })
+        
+        employeeDB.set(data)
+    })
+
+
+
+
     let handleClockIn = () => employeeDB.update( prev=>{
         if(id === '' || firstName ==='' || lastName ===''){
             alert("Please check that all input are not empty")
@@ -24,28 +45,30 @@
             alert("Please enter a 6 digit id number")
             return prev
         }
-        const date = new Date()
+        const endpoint= 'http://127.0.0.1:8000/'
 
-        const year = date.getFullYear()
-        const month = date.getMonth()+1
-        const day = date.getDate()
+        let date = new Date()
+        date = date.toISOString()
+        var newDate = date.substring(0,10)+' '+date.substring(11,19)
 
-        const hour = date.getHours()
-        const minute = date.getMinutes()
-        const second = date.getSeconds()
+        let inputData = new FormData()
+        inputData.append('id', id)
+        inputData.append('firstName', firstName)
+        inputData.append('lastName', lastName)
+        inputData.append('clockIn', newDate)
+        // inputData.append('clockOut', null)
 
-        let dateTime = year+'-'+month+'-'+day+'@'+hour+':'+minute+':'+second
-        console.log(dateTime)
-        let newClockIn = {id:id, firstName:firstName, lastName:lastName, clockInTimeStamp:dateTime, clockOutTime:null}
-        console.log(employeeDB, newClockIn)
-        return [...prev, newClockIn]
+        fetch(endpoint, {method: 'POST', body: inputData}).then(response => response.json()).then(data =>{
+            data.id = data.id.toString().padStart(6,'0')
+            // console.log(data)
+            employeeDB.update(prev => [...prev, data])
+        })  
+
+        
+        employeeDB.set(data)
     })
 
-    const employeeDB = writable([
-        {id:'123456', firstName: "Mike", lastName: "Smith", clockInTimeStamp: "2023-11-12@13:52:22", clockOutTime:"2023-11-12@20:22:22"},
-        {id:'222222', firstName: "Chris", lastName: "John", clockInTimeStamp: "2024-10-10@1:52:22", clockOutTime:"2024-10-10@11:52:22"},
-        {id:'123456', firstName: "Mary", lastName: "Jean", clockInTimeStamp: "2024-12-18@20:52:22", clockOutTime:null}
-    ])
+    const employeeDB = writable([])
     
 </script>
 
@@ -104,8 +127,8 @@
                                     <td class="text-xs md:text-base text-wrap">{item.id}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.firstName}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.lastName}</td>
-                                    <td class="text-xs md:text-base text-wrap">{item.clockInTimeStamp}</td>
-                                    <td class="text-xs md:text-base text-wrap">{item.clockOutTime}</td>
+                                    <td class="text-xs md:text-base text-wrap">{item.clockIn}</td>
+                                    <td class="text-xs md:text-base text-wrap">{item.clockOut}</td>
                                 </tr>
                         {/each}      
                     </tbody>
