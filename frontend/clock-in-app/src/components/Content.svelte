@@ -1,7 +1,7 @@
 <script>
 	import { goto } from '$app/navigation';
     import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { writable } from 'svelte/store';
 
     let group = $state('Input')
@@ -22,18 +22,19 @@
         const endpoint = 'http://127.0.0.1:8000/'
         const response = await fetch(endpoint)
         const data = await response.json()
-        // console.log(data)
+        console.log(data)
 
         data.map(obj => {
             if (obj.hasOwnProperty('id')){
                 obj.id= obj.id.toString().padStart(6,'0')
             }
+            if (obj.hasOwnProperty('employeeId')){
+                obj.employeeId= obj.employeeId.toString().padStart(6,'0')
+            }
         })
         
         employeeDB.set(data)
     })
-
-
 
 
     let handleClockIn = () => employeeDB.update( prev=>{
@@ -45,6 +46,19 @@
             alert("Please enter a 6 digit id number")
             return prev
         }
+
+        let clockInData={}
+        if($employeeDB.length){
+            clockInData = $employeeDB.find(clockInData => (clockInData.employeeId == id && clockInData.clockOut == null))
+            if(clockInData){
+                alert("This employee is already clocked in")
+                document.getElementById('idInputField').value=''
+                document.getElementById('firstNameInputField').value=''
+                document.getElementById('lastNameInputField').value=''
+                return prev
+            }
+        }
+
         const endpoint= 'http://127.0.0.1:8000/'
 
         let date = new Date()
@@ -52,21 +66,99 @@
         var newDate = date.substring(0,10)+' '+date.substring(11,19)
 
         let inputData = new FormData()
-        inputData.append('id', id)
+        inputData.append('employeeId', id)
         inputData.append('firstName', firstName)
         inputData.append('lastName', lastName)
         inputData.append('clockIn', newDate)
-        // inputData.append('clockOut', null)
+        
 
         fetch(endpoint, {method: 'POST', body: inputData}).then(response => response.json()).then(data =>{
             data.id = data.id.toString().padStart(6,'0')
+            data.employeeId = data.employeeId.toString().padStart(6,'0')
             // console.log(data)
             employeeDB.update(prev => [...prev, data])
         })  
+        document.getElementById('idInputField').value=''
+        document.getElementById('firstNameInputField').value=''
+        document.getElementById('lastNameInputField').value=''
+
+        tick().then(()=>{
+            console.log('Component just updated')
+            employeeDB.set(prev)
+        })
+
+    })
+
+
+    let handleClockOut = () => employeeDB.update( prev=>{
+        if(id === '' || firstName ==='' || lastName ===''){
+            alert("Please check that all input are not empty")
+            return prev
+        }
+        else if(id.length != 6){
+            alert("Please enter a 6 digit id number")
+            return prev
+        }
+
+        let clockInData={}
+        if($employeeDB.length){
+            clockInData = $employeeDB.find(clockInData => (clockInData.employeeId == id && clockInData.clockOut == null))
+            if( clockInData==null){
+                alert("This employee has not clocked in yet.")
+            }   
+            else if (clockInData.firstName != firstName || clockInData.lastName != lastName){
+                alert("Please make sure the entered information is correct!")
+            }
+        }
 
         
-        employeeDB.set(data)
+        const endpoint= `http://127.0.0.1:8000/${clockInData.id}/`
+        console.log(clockInData)
+        console.log(endpoint)
+
+        let date = new Date()
+        date = date.toISOString()
+        var newDate = date.substring(0,10)+' '+date.substring(11,19)
+
+        let inputData = new FormData()
+        inputData.append('employeeId', id)
+        inputData.append('firstName', clockInData.firstName)
+        inputData.append('lastName', clockInData.lastName)
+        inputData.append('clockIn', clockInData.clockIn)
+        inputData.append('clockOut', newDate)
+        
+
+        fetch(endpoint, {method: 'PUT', body: inputData}).then(response => response.json()).then(data =>{
+            employeeDB.update(prev =>{
+                let updatedTimeStamp = $employeeDB.slice()
+                let index = updatedTimeStamp.findIndex( inputData => inputData.id == data.id)
+                updatedTimeStamp[index] = inputData
+                return updatedTimeStamp
+            })
+
+            data.id = data.id.toString().padStart(6,'0')
+            data.employeeId = data.employeeId.toString().padStart(6,'0')
+            console.log(data)
+            // employeeDB.update(prev => [...prev, data])
+        })  
+        document.getElementById('idInputField').value=''
+        document.getElementById('firstNameInputField').value=''
+        document.getElementById('lastNameInputField').value=''
+
+        tick().then(()=>{
+            console.log('Component just updated')
+            employeeDB.set(prev)
+        })
+
     })
+
+
+    // onMount(async function () {
+    //     let clockInData={}
+    //     if($employeeDB.length){
+    //         clockInData = $employeeDB.find(clockInData => clockInData.employeeId == id)
+    //     }
+    // })
 
     const employeeDB = writable([])
     
@@ -85,24 +177,24 @@
                     <div class="gap-6">
                         <label class="EmployeeID">
                             <h6 class="h6 pb-2">Employee ID</h6>
-                            <input class="input" type="text" placeholder="Employee ID" maxlength="6" bind:value={id} oninput={checkIsNumber}/>
+                            <input class="input" type="text" placeholder="Employee ID" maxlength="6" bind:value={id} oninput={checkIsNumber} id="idInputField"/>
                         </label> 
                     </div>
                     <div class="gap-6">
                         <label class="FirstName">
                             <h6 class="h6 pb-2">First Name</h6>
-                            <input bind:value={firstName} oninput={(event) => checkCharIsAlphabet(event, (value) => firstName = value)} class="input" type="text" placeholder="First Name">
+                            <input bind:value={firstName} oninput={(event) => checkCharIsAlphabet(event, (value) => firstName = value)} class="input" type="text" placeholder="First Name" id="firstNameInputField"/>
                         </label> 
                     </div>
                     <div class="gap-6">
                         <label class="LastName">
                             <h6 class="h6 pb-2">Last Name</h6>
-                            <input bind:value={lastName} oninput={(event) => checkCharIsAlphabet(event, (value) => lastName = value)} class="input" type="text" placeholder="Last Name"/>
+                            <input bind:value={lastName} oninput={(event) => checkCharIsAlphabet(event, (value) => lastName = value)} class="input" type="text" placeholder="Last Name" id="lastNameInputField"/>
                         </label> 
                     </div>
                     <div class="gap-6 gap-x-8 flex justify-self-center">
                         <button type="submit" class="btn preset-filled-surface-500" onclick={handleClockIn}>Clock-In</button>
-                        <button type="button" class="btn preset-filled-surface-500">Clock-Out</button>
+                        <button type="button" class="btn preset-filled-surface-500" onclick={handleClockOut}>Clock-Out</button>
                     </div>
                 </div>
             </Tabs.Panel>
@@ -124,7 +216,7 @@
                     <tbody class="hover:[&>tr]:preset-tonal-primary">
                         {#each $employeeDB as item}
                                 <tr>
-                                    <td class="text-xs md:text-base text-wrap">{item.id}</td>
+                                    <td class="text-xs md:text-base text-wrap">{item.employeeId}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.firstName}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.lastName}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.clockIn}</td>
@@ -142,8 +234,5 @@
 <style>
     .input::-webkit-inner-spin-button{
         -webkit-appearance: none;
-    }
-    .td{
-        font-size: 11px;
     }
 </style>
