@@ -22,7 +22,7 @@
         const endpoint = 'http://127.0.0.1:8000/'
         const response = await fetch(endpoint)
         const data = await response.json()
-        console.log(data)
+        // console.log(data)
 
         data.map(obj => {
             if (obj.hasOwnProperty('id')){
@@ -35,6 +35,25 @@
         
         employeeDB.set(data)
     })
+
+    async function updateFrontEndDB() {
+        const endpoint = 'http://127.0.0.1:8000/'
+        const response = await fetch(endpoint)
+        const data = await response.json()
+        
+        data.map(obj => {
+            if (obj.hasOwnProperty('id')){
+                obj.id= obj.id.toString().padStart(6,'0')
+            }
+            if (obj.hasOwnProperty('employeeId')){
+                obj.employeeId= obj.employeeId.toString().padStart(6,'0')
+            }
+        })
+        // console.log(data)
+        
+        employeeDB.set(data)
+        // location.reload()
+    }
 
 
     let handleClockIn = () => employeeDB.update( prev=>{
@@ -78,13 +97,13 @@
             // console.log(data)
             employeeDB.update(prev => [...prev, data])
         })  
-        document.getElementById('idInputField').value=''
-        document.getElementById('firstNameInputField').value=''
-        document.getElementById('lastNameInputField').value=''
-
+        
         tick().then(()=>{
-            console.log('Component just updated')
-            employeeDB.set(prev)
+            console.log('UI Component just updated')
+            updateFrontEndDB()
+            document.getElementById('idInputField').value=''
+            document.getElementById('firstNameInputField').value=''
+            document.getElementById('lastNameInputField').value=''
         })
 
     })
@@ -113,15 +132,15 @@
 
         
         const endpoint= `http://127.0.0.1:8000/${clockInData.id}/`
-        console.log(clockInData)
-        console.log(endpoint)
+        // console.log(clockInData)
+        // console.log(endpoint)
 
         let date = new Date()
         date = date.toISOString()
         var newDate = date.substring(0,10)+' '+date.substring(11,19)
 
         let inputData = new FormData()
-        inputData.append('employeeId', id)
+        inputData.append('employeeId', clockInData.employeeId)
         inputData.append('firstName', clockInData.firstName)
         inputData.append('lastName', clockInData.lastName)
         inputData.append('clockIn', clockInData.clockIn)
@@ -131,23 +150,26 @@
         fetch(endpoint, {method: 'PUT', body: inputData}).then(response => response.json()).then(data =>{
             employeeDB.update(prev =>{
                 let updatedTimeStamp = $employeeDB.slice()
-                let index = updatedTimeStamp.findIndex( inputData => inputData.id == data.id)
-                updatedTimeStamp[index] = inputData
+                let index = updatedTimeStamp.findIndex( clockInData => clockInData.id == data.id)
+                // console.log(index)
+                updatedTimeStamp[index].clockOut = newDate
+                // console.log(updatedTimeStamp)
                 return updatedTimeStamp
             })
-
-            data.id = data.id.toString().padStart(6,'0')
-            data.employeeId = data.employeeId.toString().padStart(6,'0')
-            console.log(data)
+    
+            // data.id = data.id.toString().padStart(6,'0')
+            // data.employeeId = data.employeeId.toString().padStart(6,'0')
             // employeeDB.update(prev => [...prev, data])
+            // $employeeDB.set(data)
         })  
-        document.getElementById('idInputField').value=''
-        document.getElementById('firstNameInputField').value=''
-        document.getElementById('lastNameInputField').value=''
-
+        // console.log(employeeDB)
+        
         tick().then(()=>{
             console.log('Component just updated')
-            employeeDB.set(prev)
+            updateFrontEndDB()
+            document.getElementById('idInputField').value=''
+            document.getElementById('firstNameInputField').value=''
+            document.getElementById('lastNameInputField').value=''
         })
 
     })
@@ -159,6 +181,15 @@
     //         clockInData = $employeeDB.find(clockInData => clockInData.employeeId == id)
     //     }
     // })
+
+    function formatTime(input){
+        if(input == null){
+            return input
+        }else{
+            let newFormat = input.substring(0,10)+'@'+input.substring(11,19)
+            return newFormat
+        }
+    }
 
     const employeeDB = writable([])
     
@@ -219,8 +250,8 @@
                                     <td class="text-xs md:text-base text-wrap">{item.employeeId}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.firstName}</td>
                                     <td class="text-xs md:text-base text-wrap">{item.lastName}</td>
-                                    <td class="text-xs md:text-base text-wrap">{item.clockIn}</td>
-                                    <td class="text-xs md:text-base text-wrap">{item.clockOut}</td>
+                                    <td class="text-xs md:text-base text-wrap">{formatTime(item.clockIn)}</td>
+                                    <td class="text-xs md:text-base text-wrap">{formatTime(item.clockOut)}</td>
                                 </tr>
                         {/each}      
                     </tbody>
