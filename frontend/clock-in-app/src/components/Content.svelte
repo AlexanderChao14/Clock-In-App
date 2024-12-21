@@ -10,10 +10,12 @@
     let lastName = $state('');
     let id = $state('');
 
+    // We will assume only alphabet letters and spaces are allowed in the first and last name entry field
     function checkCharIsAlphabet(event, value) {
         value(event.target.value.replace(/[^a-zA-Z\s]/g, ''));
     }
 
+    // We will assume only numbers can be added in the id entry field
     function checkIsNumber(){
         id = id.replace(/[^0-9]/g,'')
     }
@@ -58,18 +60,22 @@
 
 
     let handleClockIn = () => employeeDB.update( prev=>{
+        // We will assume that all field need to be filld in order to clock-in or out
         if(id === '' || firstName ==='' || lastName ===''){
             alert("Please check that all input are not empty")
             return prev
         }
+        // We will assume that no id can be less that 6 digits when entering 
         else if(id.length != 6){
             alert("Please enter a 6 digit id number")
             return prev
         }
 
+        // We assume that a person clocked in has a timestamp data entry with a null/ blank clockOut data field
         let clockInData={}
         if($employeeDB.length){
             clockInData = $employeeDB.find(clockInData => (clockInData.employeeId == id && clockInData.clockOut == null))
+            // Checking and assuming that if a user has an entry clock in time and no clock out time. Then you cannot clock in again until you have clocked out.
             if(clockInData){
                 alert("This employee is already clocked in")
                 document.getElementById('idInputField').value=''
@@ -111,21 +117,27 @@
 
 
     let handleClockOut = () => employeeDB.update( prev=>{
+        // We will assume that all field need to be filld in order to clock-in or out
         if(id === '' || firstName ==='' || lastName ===''){
             alert("Please check that all input are not empty")
             return prev
         }
+        // We will assume that no id can be less that 6 digits when entering 
         else if(id.length != 6){
             alert("Please enter a 6 digit id number")
             return prev
         }
 
+        // We assume that a person clocked in has a timestamp data entry with a null/ blank clockOut data field
         let clockInData={}
         if($employeeDB.length){
+            // looking for a matching clocked In data entry by matching employee id with a null clock out time
             clockInData = $employeeDB.find(clockInData => (clockInData.employeeId == id && clockInData.clockOut == null))
+            // Checking to see if user is clocked in by searching for their employeeId and a null clockOut data field.
             if( clockInData==null){
                 alert("This employee has not clocked in yet.")
             }   
+            // Error handling and making sure the first name and last name enter matches the grabbed data
             else if (clockInData.firstName != firstName || clockInData.lastName != lastName){
                 alert("Please make sure the entered information is correct!")
             }
@@ -183,6 +195,7 @@
     //     }
     // })
 
+    // Function to format the date time data entry for clock in and out to make it more readable.
     function formatTime(input){
         if(input == null){
             return input
