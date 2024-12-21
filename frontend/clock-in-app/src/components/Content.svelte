@@ -19,6 +19,7 @@
     }
 
     onMount(async function () {
+        console.log("Running on mount")
         const endpoint = import.meta.env.VITE_API_BASE_URL
         const response = await fetch(endpoint)
         const data = await response.json()
