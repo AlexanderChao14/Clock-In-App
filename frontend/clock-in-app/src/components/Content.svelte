@@ -19,7 +19,7 @@
     }
 
     onMount(async function () {
-        const endpoint = 'http://127.0.0.1:8000/'
+        const endpoint = import.meta.env.VITE_API_BASE_URL
         const response = await fetch(endpoint)
         const data = await response.json()
         // console.log(data)
@@ -37,7 +37,7 @@
     })
 
     async function updateFrontEndDB() {
-        const endpoint = 'http://127.0.0.1:8000/'
+        const endpoint = import.meta.env.VITE_API_BASE_URL
         const response = await fetch(endpoint)
         const data = await response.json()
         
@@ -78,7 +78,7 @@
             }
         }
 
-        const endpoint= 'http://127.0.0.1:8000/'
+        const endpoint= import.meta.env.VITE_API_BASE_URL
 
         let date = new Date()
         date = date.toISOString()
@@ -131,7 +131,7 @@
         }
 
         
-        const endpoint= `http://127.0.0.1:8000/${clockInData.id}/`
+        const endpoint= `${import.meta.env.VITE_API_BASE_URL}/${clockInData.id}/`
         // console.log(clockInData)
         // console.log(endpoint)
 
