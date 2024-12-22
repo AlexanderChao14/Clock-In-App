@@ -136,10 +136,12 @@
             // Checking to see if user is clocked in by searching for their employeeId and a null clockOut data field.
             if( clockInData==null){
                 alert("This employee has not clocked in yet.")
+                return prev
             }   
             // Error handling and making sure the first name and last name enter matches the grabbed data
             else if (clockInData.firstName.toLowerCase() != firstName.toLowerCase() || clockInData.lastName.toLowerCase() != lastName.toLowerCase()){
                 alert("Please make sure the entered first and last name is correct for this employee!")
+                return prev
             }
         }
 
