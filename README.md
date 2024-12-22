@@ -11,15 +11,16 @@
 1. First clone the repository from GitHub. URL: [Clock-In App](https://github.com/AlexanderChao14/Clock-In-App)
 2. Open your terminal and run `cd frontend/clock-in-app` to cd into the frontend folder.
 3. Run the command `npm i` or `npm install` to install the required frontend packages. 
-4. Open the `.env` folder and then replace everything after the `=` with `http://127.0.0.1:8000/`, this will be your local backend ip address.
+4. Create a `.env` file in this directory and add this line of code `VITE_API_BASE_URL=http://127.0.0.1:8000/` and save this file.
 5. Make sure you are in `frontend/clock-in-app/` and then run the command `npm run dev` to run the frontend locally. Open a web browser and type in `http://localhost:5173/` to access the frontend app that is running locally. 
-6. Open a new terminal while the previous one is still running. In the new terminal run `cd backend/`. Now we are going to download and create a virtual environment for Python to run the backend of the Clock-In App locally. Run the command `python -venv ./env`.
+6. Open a new terminal while the previous one is still running. In the new terminal run `cd backend/`. Now we are going to download and create a virtual environment for Python to run the backend of the Clock-In App locally. Run the command `python -m venv ./env`.
 7. Once the virtual environment is created in this folder, if you are using a Git Bash terminal run the command: `source env/Scripts/activate`. If you are using a Powershell terminal run the command: `./env/Script/activate`. The virtual environment should be running now in this terminal and you will know if this is working when `(env)` now appears before or above your terminal input.
 8. Run `cd /clock_in_app` to go into this folder, we will now run `pip install -r requirements.txt` to install all the required python libraries.
 9. Run `python manage.py makemigrations` to generate a migration file and folder if you are missing it. Now run `python manage.py migrate` to generate the SQLite database if not already initiallized within the clone repository.
 10. Now run `python manage.py runserver` to start up the backend locally.
 11. Open a new web browser from your local frontend web page and enter in either `http://127.0.0.1:8000/` or `localhost:8000` to see the backend that is running locally. You should see a blank database if you have created a new SQLite database or some dummy data entry from the cloned repository SQLite database.
-12. Now go back to your frontend application and refresh the web page. Now you can use the Clock-In App locally and employees can now clock in and out of the web application.
+12. Now go back to your frontend application and refresh the web page. You should see something like this running now. ![Frontend](LocalTutorial1.JPG) ![Backend](LocalTutorial2.JPG)
+13. Now you can use the Clock-In App locally and employees can now clock in and out of the web application.
 
 ---
 ## The Tech Stack And Tools Used For The Project
