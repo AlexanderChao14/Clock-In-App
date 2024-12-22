@@ -136,7 +136,6 @@ declare module '$env/static/private' {
 	export const WINDIR: string;
 	export const _: string;
 	export const _JAVA_OPTIONS: string;
-	export const __COMPAT_LAYER: string;
 }
 
 /**
@@ -278,7 +277,6 @@ declare module '$env/dynamic/private' {
 		WINDIR: string;
 		_: string;
 		_JAVA_OPTIONS: string;
-		__COMPAT_LAYER: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;
 	}

@@ -62,12 +62,12 @@
     let handleClockIn = () => employeeDB.update( prev=>{
         // We will assume that all field need to be filld in order to clock-in or out
         if(id === '' || firstName ==='' || lastName ===''){
-            alert("Please check that all input are not empty")
+            alert("Please check that any of the input are not empty.")
             return prev
         }
         // We will assume that no id can be less that 6 digits when entering 
         else if(id.length != 6){
-            alert("Please enter a 6 digit id number")
+            alert("Please enter a 6 digit employee id number")
             return prev
         }
 
@@ -77,7 +77,7 @@
             clockInData = $employeeDB.find(clockInData => (clockInData.employeeId == id && clockInData.clockOut == null))
             // Checking and assuming that if a user has an entry clock in time and no clock out time. Then you cannot clock in again until you have clocked out.
             if(clockInData){
-                alert("This employee is already clocked in")
+                alert("This employee is already clocked in.")
                 document.getElementById('idInputField').value=''
                 document.getElementById('firstNameInputField').value=''
                 document.getElementById('lastNameInputField').value=''
@@ -119,12 +119,12 @@
     let handleClockOut = () => employeeDB.update( prev=>{
         // We will assume that all field need to be filld in order to clock-in or out
         if(id === '' || firstName ==='' || lastName ===''){
-            alert("Please check that all input are not empty")
+            alert("Please check that any of the input are not empty.")
             return prev
         }
         // We will assume that no id can be less that 6 digits when entering 
         else if(id.length != 6){
-            alert("Please enter a 6 digit id number")
+            alert("Please enter a 6 digit employee id number.")
             return prev
         }
 
@@ -138,8 +138,8 @@
                 alert("This employee has not clocked in yet.")
             }   
             // Error handling and making sure the first name and last name enter matches the grabbed data
-            else if (clockInData.firstName != firstName || clockInData.lastName != lastName){
-                alert("Please make sure the entered information is correct!")
+            else if (clockInData.firstName.toLowerCase() != firstName.toLowerCase() || clockInData.lastName.toLowerCase() != lastName.toLowerCase()){
+                alert("Please make sure the entered first and last name is correct for this employee!")
             }
         }
 
