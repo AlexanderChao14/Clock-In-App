@@ -57,5 +57,4 @@
 - For clocking out function, we are looking for a valid clocked In data entry by matching the employee id with a null clock out time field.
 - When clocking out, if we cannot find a valid clocked In data entry that matches the employee id, then we will assume that null means the employee has not clocked in yet.
 - The clock out function will also compare the entered first and last name with the valid clocked in first and last name to see if it matches. When comparing we will compare both sides in all lowercase.
-
-
+- That all of the clock in and out timestamp are recorded in UTC timezone.
