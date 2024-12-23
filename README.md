@@ -26,13 +26,17 @@
 ## The Tech Stack And Tools Used For The Project
 ### Frontend
 - Sveltekit 
+- JavaScript
+- Node.js
 - Tailwind css
 - Skeletonlabs
 - Prettier
 - Eslint
 - Vercel
+- Vite
 
 ### Backend
+- Python
 - Django
 - Django REST Framework
 - Django Cors Header
